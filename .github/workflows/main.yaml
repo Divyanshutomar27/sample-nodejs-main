@@ -1,0 +1,56 @@
+name: JavaScript CI
+
+on:
+  push:
+    branches:
+      - development
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: nodejs-app
+  AZURE_WEBAPP_PACKAGE_PATH: 'build'  # Adjust this to the output directory after build
+  NODE_VERSION: '20.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      # Checkout the repo
+      - name: 'Checkout GitHub Action' 
+        uses: actions/checkout@main
+
+      # Set up Node.js
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Install dependencies and build
+      - name: 'npm install, build, and test'
+        run: |
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+
+      # Create ZIP file of the build directory
+      - name: 'Archive build folder'
+        run: zip -r build.zip ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      # Login to Azure
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy the ZIP file to Azure
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: 'build.zip'
+
+      # Azure logout
+      - name: logout
+        run: az logout
