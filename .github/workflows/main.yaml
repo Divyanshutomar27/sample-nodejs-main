@@ -39,7 +39,7 @@ jobs:
       - name: List build directory contents
         run: |
           echo "Listing all files in the directory after build"
-          ls -R
+          ls -la
 
       # Create ZIP file of the build directory
       - name: 'Archive build folder'
