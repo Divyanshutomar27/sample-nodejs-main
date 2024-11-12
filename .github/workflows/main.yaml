@@ -33,16 +33,6 @@ jobs:
       - name: 'npm install, build, and test'
         run: |
           npm install
-          npm run build
-
-      - name: List build directory contents
-        run: |
-          echo "Listing all files in the directory after build"
-          ls -la
-
-      # Create ZIP file of the build directory
-      - name: 'Archive build folder'
-        run: zip -r build.zip ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       # Login to Azure
       - uses: azure/login@v1
